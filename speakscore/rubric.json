@@ -1,0 +1,270 @@
+{
+  "name": "Spoken self-introduction",
+  "version": "1.0",
+  "criteria": [
+    {
+      "id": "content",
+      "name": "Content & Structure",
+      "weight": 40,
+      "checks": [
+        {
+          "id": "salutation",
+          "label": "Salutation",
+          "metric": "salutation",
+          "points": 5,
+          "bands": [
+            {"min": 3, "score": 1.0, "feedback": "Warm, engaging opening ('{matched}')."},
+            {"min": 2, "score": 0.8, "feedback": "Polite greeting ('{matched}'). A line such as 'I'm glad to be here' would make the opening more engaging."},
+            {"min": 1, "score": 0.5, "feedback": "Casual greeting ('{matched}'). 'Good morning, everyone' sets a more confident tone."},
+            {"score": 0.0, "feedback": "No greeting in the opening. Start with something like 'Good morning, everyone'."}
+          ]
+        },
+        {
+          "id": "coverage",
+          "label": "Key details",
+          "metric": "coverage",
+          "points": 25,
+          "linear": [0, 1],
+          "bands": [
+            {"min": 1, "feedback": "Covers every key detail: who you are, what you do, what you enjoy and where you are headed."},
+            {"min": 0.6, "feedback": "Good coverage. Still missing: {missing}."},
+            {"feedback": "Several key details are missing: {missing}."}
+          ]
+        },
+        {
+          "id": "order",
+          "label": "Logical flow",
+          "metric": "order",
+          "points": 10,
+          "linear": [0, 1],
+          "bands": [
+            {"min": 1, "feedback": "Ideas follow a natural order, from who you are to where you are headed."},
+            {"min": 0.6, "feedback": "Mostly well ordered, but {out_of_order} comes out of sequence. A natural flow is name, background, education or work, family, interests, goals, closing."},
+            {"feedback": "The structure is hard to follow. Try name, background, education or work, family, interests, goals, then a closing line."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speech_rate",
+      "name": "Speech Rate",
+      "weight": 10,
+      "checks": [
+        {
+          "id": "pace",
+          "label": "Speaking pace",
+          "metric": "speech_rate",
+          "points": 10,
+          "bands": [
+            {"min": 110, "max": 150, "score": 1.0, "feedback": "Comfortable pace at {wpm} words per minute."},
+            {"min": 150, "max": 170, "score": 0.7, "feedback": "Slightly fast at {wpm} words per minute. Pause briefly between ideas."},
+            {"min": 90, "max": 110, "score": 0.7, "feedback": "Slightly slow at {wpm} words per minute. Aim for 110 to 150."},
+            {"min": 170, "max": 200, "score": 0.4, "feedback": "Fast at {wpm} words per minute; listeners may miss details. Aim for 110 to 150."},
+            {"min": 70, "max": 90, "score": 0.4, "feedback": "Slow at {wpm} words per minute, which can sound hesitant. Aim for 110 to 150."},
+            {"score": 0.1, "feedback": "A pace of {wpm} words per minute is far outside the comfortable 110 to 150 range."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "language",
+      "name": "Language & Grammar",
+      "weight": 20,
+      "checks": [
+        {
+          "id": "grammar",
+          "label": "Grammar",
+          "metric": "grammar",
+          "points": 10,
+          "linear": [6, 0],
+          "bands": [
+            {"max": 0.01, "feedback": "No grammar issues detected."},
+            {"max": 2, "feedback": "Minor slips ({issues} found), for example {examples}."},
+            {"feedback": "Frequent grammar issues ({issues} found), for example {examples}. Practise these sentences aloud."}
+          ]
+        },
+        {
+          "id": "vocabulary",
+          "label": "Vocabulary range",
+          "metric": "vocabulary",
+          "points": 10,
+          "linear": [0.45, 0.7],
+          "bands": [
+            {"min": 0.7, "feedback": "Varied, expressive vocabulary."},
+            {"min": 0.58, "feedback": "Decent range. Swap repeated words for more specific ones."},
+            {"feedback": "Repetitive wording. Describe your interests and goals with more specific words."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clarity",
+      "name": "Clarity",
+      "weight": 15,
+      "checks": [
+        {
+          "id": "fillers",
+          "label": "Filler words",
+          "metric": "fillers",
+          "points": 15,
+          "bands": [
+            {"max": 1, "score": 1.0, "feedback": "Clean delivery with almost no filler words."},
+            {"max": 3, "score": 0.75, "feedback": "A few fillers ({found}). Replace them with a short pause."},
+            {"max": 6, "score": 0.45, "feedback": "Noticeable fillers ({found}). Slow down and pause instead of filling silence."},
+            {"max": 10, "score": 0.2, "feedback": "Frequent fillers ({found}) distract from the message. Rehearse until the key lines feel natural."},
+            {"score": 0.0, "feedback": "Fillers ({found}) dominate the delivery. Practise with a short outline and deliberate pauses."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "engagement",
+      "name": "Engagement",
+      "weight": 15,
+      "checks": [
+        {
+          "id": "positivity",
+          "label": "Positivity",
+          "metric": "sentiment",
+          "points": 15,
+          "bands": [
+            {"min": 0.9, "score": 1.0, "feedback": "Positive and enthusiastic tone throughout."},
+            {"min": 0.6, "score": 0.8, "feedback": "Generally positive. Share what genuinely excites you to sound more engaged."},
+            {"min": 0.2, "score": 0.55, "feedback": "Fairly neutral tone. Mention what you enjoy or look forward to."},
+            {"min": -0.2, "score": 0.3, "feedback": "Flat delivery. Talk about things you are proud of or excited about."},
+            {"score": 0.1, "feedback": "The tone comes across as negative. Reframe challenges as things you are working on."}
+          ]
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "name",
+      "label": "Name",
+      "points": 4,
+      "patterns": [
+        "\\bmy name(?: is|'s)\\b",
+        "\\bmyself (?-i:[A-Z][a-z]+)",
+        "\\b(?:i am|i'm|this is) (?-i:[A-Z][a-z]+)",
+        "\\b(?:people|friends|you can) call me\\b",
+        "\\bi go by\\b"
+      ]
+    },
+    {
+      "id": "background",
+      "label": "Age or background",
+      "points": 3,
+      "patterns": [
+        "\\b(?:\\d{1,2}|[a-z]+(?:-[a-z]+)?) years? old\\b",
+        "\\bmy age is\\b",
+        "\\bi(?: am|'m) (?:originally )?from\\b",
+        "\\b(?:i come|i hail|originally) from\\b",
+        "\\bi (?:grew up|was born|was raised)\\b",
+        "\\bi (?:live|stay) in\\b",
+        "\\bi(?: am|'m) based in\\b",
+        "\\bmy (?:hometown|home town|native place)\\b"
+      ]
+    },
+    {
+      "id": "education",
+      "label": "Education or work",
+      "points": 4,
+      "patterns": [
+        "\\b(?:studying|studied|student|pursuing|graduated|graduating|enrolled|majoring)\\b",
+        "\\bi study\\b",
+        "\\b(?:class|grade|standard|year) (?:\\d{1,2}|[a-z]+th)\\b",
+        "\\b(?:at|in|from|to) (?:the |a )?(?:[a-z]+ ){0,4}(?:school|college|university|academy|institute)\\b",
+        "\\bi (?:work|worked)(?: as| at| for| in| on)\\b",
+        "\\bi(?: am|'m) (?:currently )?(?:working|employed)\\b",
+        "\\bmy (?:job|role|degree|major|team)\\b",
+        "\\byears? of experience\\b"
+      ]
+    },
+    {
+      "id": "family",
+      "label": "Family",
+      "points": 3,
+      "patterns": [
+        "\\bmy (?:family|parents|father|mother|dad|mom|mum|brothers?|sisters?|siblings?|grandparents|grandfather|grandmother|grandma|grandpa|wife|husband|children|kids|son|daughter)\\b",
+        "\\bi live with\\b",
+        "\\b(?:an|the) only child\\b",
+        "\\bfamily of (?:\\d|two|three|four|five|six|seven|eight)\\b"
+      ]
+    },
+    {
+      "id": "interests",
+      "label": "Hobbies or interests",
+      "points": 4,
+      "patterns": [
+        "\\bmy (?:hobby|hobbies|interests?|passion|pastimes?|favou?rite (?:hobby|pastime|sport|game|activity))\\b",
+        "\\bi (?:really |also |truly )?(?:enjoy|love|like|adore)\\b",
+        "\\bin my (?:free|spare|leisure) time\\b",
+        "\\bi(?: am|'m) (?:interested|passionate|keen) (?:in|about|on)\\b",
+        "\\bi (?:play|paint|sing|dance|draw|cook|bake|swim|cycle|hike|trek|read|write|code|garden|travel)\\b",
+        "\\bfor fun\\b"
+      ]
+    },
+    {
+      "id": "goals",
+      "label": "Goals",
+      "points": 4,
+      "patterns": [
+        "\\bmy (?:goal|goals|dream|dreams|ambition|aim|aspiration|plan)\\b",
+        "\\bi(?: want| hope| wish| plan| aspire| aim| intend| would like|'d like) to\\b",
+        "\\bi dream of\\b",
+        "\\b(?:in the future|one day|someday|some day|when i grow up|in the long run|in the coming years|in the next few years)\\b",
+        "\\b(?:looking forward to|working towards)\\b"
+      ]
+    },
+    {
+      "id": "closing",
+      "label": "Closing",
+      "points": 3,
+      "zone": "closing",
+      "patterns": [
+        "\\bthank(?:s| you)\\b",
+        "\\bthat(?:'s| is) (?:all|it|everything)\\b",
+        "\\bnice (?:to meet|meeting) (?:you|everyone|all)\\b",
+        "\\bhave a (?:great|nice|good|wonderful|lovely) day\\b",
+        "\\bgrateful for (?:the|this) (?:opportunity|chance)\\b"
+      ]
+    }
+  ],
+  "salutations": [
+    {"level": 1, "label": "Casual", "phrases": ["hi", "hello", "hey", "hiya"]},
+    {
+      "level": 2,
+      "label": "Polite",
+      "phrases": [
+        "good morning", "good afternoon", "good evening", "good day", "greetings", "namaste",
+        "hello everyone", "hi everyone", "hello all", "hi all", "respected"
+      ]
+    },
+    {
+      "level": 3,
+      "label": "Engaging",
+      "phrases": [
+        "glad to be here", "happy to be here", "a pleasure to", "excited to", "delighted to",
+        "pleased to", "honoured to", "honored to", "thank you for having me",
+        "thank you for this opportunity"
+      ]
+    }
+  ],
+  "fillers": [
+    "um", "umm", "uh", "uhh", "uhm", "er", "erm", "ah", "hmm", "like,", "you know", "i mean",
+    "basically", "literally", "kinda", "sorta", "so yeah"
+  ],
+  "grades": [
+    {"min": 85, "grade": "A", "label": "Excellent"},
+    {"min": 70, "grade": "B", "label": "Good"},
+    {"min": 55, "grade": "C", "label": "Fair"},
+    {"min": 40, "grade": "D", "label": "Needs work"},
+    {"min": 0, "grade": "E", "label": "Weak"}
+  ],
+  "reliability": {
+    "min_words": 50,
+    "min_function_word_ratio": 0.3,
+    "min_lexical_diversity": 0.45
+  }
+}
