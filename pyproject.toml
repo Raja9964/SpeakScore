@@ -16,9 +16,6 @@ dependencies = [
     "vaderSentiment>=3.3.2,<4",
 ]
 
-[project.scripts]
-speakscore = "speakscore.cli:main"
-
 [tool.setuptools]
 packages = ["speakscore"]
 
