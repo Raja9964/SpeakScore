@@ -1,0 +1,5 @@
+[
+  {"file": "strong.txt", "label": "Strong", "duration_seconds": 85},
+  {"file": "average.txt", "label": "Average", "duration_seconds": 50},
+  {"file": "weak.txt", "label": "Weak", "duration_seconds": 22}
+]
