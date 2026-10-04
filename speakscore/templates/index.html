@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SpeakScore</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="9"></rect>
+        <path d="M8 18v-4M12 22V10M16 25V7M20 21v-10M24 17v-2"></path>
+      </svg>
+      <div>
+        <h1>SpeakScore</h1>
+        <p>Rubric-based feedback for spoken self-introductions</p>
+      </div>
+    </div>
+    <span class="rubric-tag">{{ rubric.name }} &middot; v{{ rubric.version }}</span>
+  </header>
+
+  <main class="layout">
+    <section class="card input-card">
+      <form id="score-form" novalidate>
+        <div class="field-head">
+          <label for="transcript">Transcript</label>
+          <span id="word-count" class="muted">0 words</span>
+        </div>
+        <textarea id="transcript" name="transcript" rows="14"
+          placeholder="Paste the transcript of a self-introduction here..."></textarea>
+
+        <div class="row">
+          <div class="field">
+            <label for="duration">Duration <span class="muted">(seconds, optional)</span></label>
+            <input id="duration" name="duration" type="number" min="1" max="3600" step="1" placeholder="e.g. 60">
+          </div>
+          <div class="actions">
+            <button type="button" id="clear" class="ghost">Clear</button>
+            <button type="submit" id="submit" class="primary">Score transcript</button>
+          </div>
+        </div>
+
+        {% if samples %}
+        <div class="samples">
+          <span class="muted">Try a sample:</span>
+          {% for sample in samples %}
+          <button type="button" class="chip-button" data-sample="{{ loop.index0 }}">{{ sample.label }}</button>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <p id="error" class="error" role="alert" hidden></p>
+      </form>
+
+      <details class="rubric">
+        <summary>How it is scored</summary>
+        <ul>
+          {% for criterion in rubric.criteria %}
+          <li><span>{{ criterion.name }}</span><span>{{ criterion.weight|int }} pts</span></li>
+          {% endfor %}
+        </ul>
+      </details>
+    </section>
+
+    <section class="card results-card" aria-live="polite">
+      <div id="empty" class="empty">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26"></circle><path d="M20 34l8 8 16-18"></path></svg>
+        <h2>Your breakdown appears here</h2>
+        <p class="muted">Paste a transcript, add the recording length if you have it, and press <strong>Score transcript</strong>.</p>
+      </div>
+      <div id="results" hidden></div>
+    </section>
+  </main>
+
+  <footer class="footer muted">SpeakScore v{{ version }} &middot; <a href="{{ url_for('api.health') }}">API health</a></footer>
+
+  <script id="samples-data" type="application/json">{{ samples|tojson }}</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
