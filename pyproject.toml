@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "speakscore"
+version = "1.0.0"
+description = "Rubric-driven scoring and feedback for spoken self-introduction transcripts."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Raja Mohamad" }]
+requires-python = ">=3.11"
+dependencies = [
+    "Flask>=3.1,<4",
+    "python-dotenv>=1.0,<2",
+    "vaderSentiment>=3.3.2,<4",
+]
+
+[project.scripts]
+speakscore = "speakscore.cli:main"
+
+[tool.setuptools]
+packages = ["speakscore"]
+
+[tool.setuptools.package-data]
+speakscore = ["rubric.json", "templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
