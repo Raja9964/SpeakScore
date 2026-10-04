@@ -46,7 +46,7 @@
         <div class="samples">
           <span class="muted">Try a sample:</span>
           {% for sample in samples %}
-          <button type="button" class="chip-button" data-sample="{{ loop.index0 }}">{{ sample.label }}</button>
+          <button type="button" class="chip-button" data-sample="{{ sample.id }}">{{ sample.label }}</button>
           {% endfor %}
         </div>
         {% endif %}

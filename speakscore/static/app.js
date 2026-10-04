@@ -8,6 +8,23 @@
   const empty = document.getElementById("empty");
   const results = document.getElementById("results");
   const samples = JSON.parse(document.getElementById("samples-data").textContent);
+  const singleColumn = window.matchMedia("(max-width: 900px)");
+
+  // Flask scores through the API; the static demo swaps in an in-browser scorer.
+  const apiScorer = {
+    async score(body) {
+      const response = await fetch("/api/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+      return data;
+    },
+  };
+  const scorer = window.speakscoreScorer || apiScorer;
+  let run = 0;
 
   const escapeHtml = (value) =>
     String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -30,6 +47,11 @@
   const showError = (message) => {
     errorBox.textContent = message;
     errorBox.hidden = !message;
+  };
+
+  const setBusy = (label) => {
+    submit.disabled = Boolean(label);
+    submit.textContent = label || "Score transcript";
   };
 
   const ring = (score, color) => {
@@ -100,6 +122,7 @@
       <div class="criteria"><h3>Breakdown</h3>${report.criteria.map(renderCriterion).join("")}</div>`;
     empty.hidden = true;
     results.hidden = false;
+    if (singleColumn.matches) results.parentElement.scrollIntoView({ block: "start" });
   };
 
   form.addEventListener("submit", async (event) => {
@@ -112,44 +135,64 @@
     const body = { transcript: transcript.value };
     if (duration.value) body.duration_seconds = Number(duration.value);
 
-    submit.disabled = true;
-    submit.textContent = "Scoring...";
+    // Only the latest request may render, so a slow earlier one can't overwrite it.
+    const current = ++run;
+    setBusy(scorer.status === "loading" ? "Loading\u2026" : "Scoring\u2026");
     try {
-      const response = await fetch("/api/score", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
-      render(data);
+      const report = await scorer.score(body);
+      if (current === run) render(report);
     } catch (err) {
-      showError(err.message);
+      if (current === run) showError(err.message);
     } finally {
-      submit.disabled = false;
-      submit.textContent = "Score transcript";
+      if (current === run) setBusy("");
     }
   });
 
+  // Samples show up as #sample=<id>, so a result can be shared or refreshed.
+  const findSample = (id) => samples.find((s) => s.id === id);
+  const linkedSample = () => findSample(new URLSearchParams(location.hash.slice(1)).get("sample"));
+  const forgetSample = () => {
+    if (location.hash.startsWith("#sample=")) history.replaceState(null, "", location.pathname + location.search);
+  };
+
+  const loadSample = (sample) => {
+    transcript.value = sample.transcript;
+    duration.value = sample.duration_seconds ?? "";
+    updateCount();
+    form.requestSubmit();
+  };
+
   document.getElementById("clear").addEventListener("click", () => {
+    run += 1;
+    setBusy("");
     transcript.value = "";
     duration.value = "";
     showError("");
     updateCount();
+    forgetSample();
     results.hidden = true;
     empty.hidden = false;
   });
 
   document.querySelectorAll("[data-sample]").forEach((button) => {
     button.addEventListener("click", () => {
-      const sample = samples[Number(button.dataset.sample)];
-      transcript.value = sample.transcript;
-      duration.value = sample.duration_seconds ?? "";
-      updateCount();
-      form.requestSubmit();
+      const sample = findSample(button.dataset.sample);
+      history.replaceState(null, "", `#sample=${encodeURIComponent(sample.id)}`);
+      loadSample(sample);
     });
   });
 
-  transcript.addEventListener("input", updateCount);
+  transcript.addEventListener("input", () => {
+    updateCount();
+    forgetSample();
+  });
+  duration.addEventListener("input", forgetSample);
+  window.addEventListener("hashchange", () => {
+    const sample = linkedSample();
+    if (sample) loadSample(sample);
+  });
+
   updateCount();
+  const linked = linkedSample();
+  if (linked) loadSample(linked);
 })();

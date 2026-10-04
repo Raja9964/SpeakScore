@@ -97,6 +97,7 @@ def _load_samples(directory: Path) -> list[dict[str, Any]]:
         if path.is_file():
             samples.append(
                 {
+                    "id": path.stem,
                     "label": entry["label"],
                     "duration_seconds": entry.get("duration_seconds"),
                     "transcript": path.read_text(encoding="utf-8").strip(),
