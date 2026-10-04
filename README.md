@@ -4,6 +4,8 @@ Rubric-driven scoring and actionable feedback for spoken self-introduction trans
 
 [![CI](https://github.com/Raja9964/SpeakScore/actions/workflows/ci.yml/badge.svg)](https://github.com/Raja9964/SpeakScore/actions/workflows/ci.yml)
 
+**[▶ Live demo](https://raja9964.github.io/SpeakScore/)**: a static page that runs this Python package in your browser with Pyodide (WebAssembly). There is no backend, and nothing you type leaves the page.
+
 ![Scored result for a strong introduction](docs/screenshots/result.png)
 
 | Weak sample with top improvements | Full breakdown |
@@ -18,7 +20,8 @@ Rubric-driven scoring and actionable feedback for spoken self-introduction trans
 - Lightweight, explainable metrics: phrase detection, rule-based grammar checks, MATTR vocabulary richness, filler-word rate and VADER sentiment. No ML models to download.
 - A reliability gate that scales scores down for very short, keyword-stuffed or repetitive input.
 - JSON API with input validation (clear 400 messages) and a health endpoint.
-- Single-page web UI with sample transcripts, a score ring, per-criterion bars and metric chips.
+- Single-page web UI with sample transcripts, a score ring, per-criterion bars and metric chips. A scored sample can be linked to directly, for example `#sample=weak`.
+- A live demo on GitHub Pages that runs the same package in the browser with Pyodide, so it returns the same report as the Flask API. The demo and the Flask app share the page template and front-end script; only the scorer behind them differs.
 - The rubric is validated on load (weights must add up to 100, bands must cover every value, regexes must compile).
 
 ## How scoring works
@@ -56,14 +59,16 @@ Results on the bundled samples: `strong.txt` 100 (A), `average.txt` 81.4 (B), `w
 
 ## Tech stack
 
-Python 3.11+, Flask 3, vaderSentiment, python-dotenv, vanilla HTML/CSS/JS, pytest and ruff, GitHub Actions.
+Python 3.11+, Flask 3, vaderSentiment, python-dotenv, vanilla HTML/CSS/JS, Pyodide for the live demo, pytest and ruff, GitHub Actions and GitHub Pages.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     UI[Web UI<br/>index.html + app.js] -->|POST /api/score| API[Flask app factory<br/>speakscore/web.py]
+    UI -.->|live demo| Pyodide[Pyodide in the browser<br/>pyodide-scorer.js]
     API -->|validate input| Engine[Scorer<br/>engine.py]
+    Pyodide -.->|same package| Engine
     Rubric[(rubric.json)] --> Loader[Rubric loader<br/>rubric.py] --> Engine
     Engine --> Text[Document<br/>text.py]
     Engine --> Metrics[Metrics<br/>metrics.py + grammar.py]
@@ -72,6 +77,17 @@ flowchart LR
 ```
 
 The engine knows nothing about specific criteria: it looks up each check's `metric` name in a registry, runs it on the parsed `Document`, and applies the rubric's bands or linear range. Changing weights, thresholds, phrases or feedback text only needs a rubric edit.
+
+### How the live demo works
+
+The demo is a static build of the same page, deployed by the [`pages.yml`](.github/workflows/pages.yml) workflow on every push to `main`:
+
+1. [`scripts/build_demo.py`](scripts/build_demo.py) renders the Flask template in demo mode and copies the static files.
+2. It builds a `speakscore` wheel and downloads the pinned `vaderSentiment` wheel with `pip download --no-deps --only-binary=:all:`. Both are pure Python and are served from the same origin as the page.
+3. In the browser, [`pyodide-scorer.js`](speakscore/static/pyodide-scorer.js) loads Pyodide from jsDelivr, installs the two wheels and calls `score_transcript`, which loads the packaged `rubric.json`. It applies the same input checks and error messages as the API.
+4. `app.js` picks that scorer when it is present and otherwise posts to `/api/score`, so the Flask app and the demo share one front-end script.
+
+The first visit downloads about 5 MB for the Python runtime, which the browser then caches. A banner on the page says it is a demo running in the browser.
 
 ## Project structure
 
@@ -84,14 +100,17 @@ speakscore/
   rubric.json      default rubric
   text.py          normalisation, tokens, sentences, MATTR, function-word ratio
   web.py           Flask app factory and /api blueprint
-  templates/       index.html
-  static/          style.css, app.js
+  templates/       index.html (also rendered for the live demo)
+  static/          style.css, app.js, favicon.svg, pyodide-scorer.js (live demo only)
 samples/           fictional transcripts and samples.json (durations for the UI)
+scripts/
+  build_demo.py    builds the static GitHub Pages demo into _site/
 tests/             pytest suite
 docs/screenshots/  README images
+.github/workflows/ ci.yml (lint and tests), pages.yml (builds and deploys the demo)
 ```
 
-## Getting started
+## Run it locally
 
 Requires Python 3.11 or newer.
 
@@ -112,14 +131,25 @@ source .venv/Scripts/activate
 source .venv/bin/activate
 ```
 
-Install and run:
+Install and start the app:
 
 ```bash
 pip install -r requirements.txt
-flask run            # http://127.0.0.1:8000 (settings come from .flaskenv)
+flask run
 ```
 
+Flask serves the web UI and the API on port 8000 (set in `.flaskenv`).
+
 Optional configuration: copy `.env.example` to `.env`. `FLASK_DEBUG=1` enables debug mode (off by default); `SPEAKSCORE_RUBRIC_PATH`, `SPEAKSCORE_SAMPLES_DIR` and `SPEAKSCORE_MAX_TRANSCRIPT_CHARS` override the defaults.
+
+To try the static demo build instead (it downloads two wheels, so it needs internet access):
+
+```bash
+python -m scripts.build_demo
+python -m http.server 8001 --directory _site
+```
+
+The second command serves the demo on port 8001.
 
 ## API reference
 
@@ -130,10 +160,13 @@ Optional configuration: copy `.env.example` to `.env`. `FLASK_DEBUG=1` enables d
 | `transcript` | string | yes | Non-empty, at most 20,000 characters |
 | `duration_seconds` | number | no | Greater than 0 and at most 3600; enables speech rate |
 
-```bash
-curl -X POST http://127.0.0.1:8000/api/score \
-  -H "Content-Type: application/json" \
-  -d '{"transcript": "Hello. My name is Kabir Solanki and I am fifteen years old. ...", "duration_seconds": 50}'
+Example request:
+
+```http
+POST /api/score
+Content-Type: application/json
+
+{"transcript": "Hello. My name is Kabir Solanki and I am fifteen years old. ...", "duration_seconds": 50}
 ```
 
 Response (shortened; `criteria` contains all five criteria):
@@ -200,7 +233,7 @@ pytest
 ruff check . && ruff format --check .
 ```
 
-The suite covers each metric and grammar rule, the rubric loader's validation errors, the API's success and error responses, and sanity checks: the strong sample scores at least 75, the weak sample scores below 40, keyword stuffing scores below 40, and empty input is rejected.
+The suite covers each metric and grammar rule, the rubric loader's validation errors, the API's success and error responses, the static demo build, and sanity checks: the strong sample scores at least 75, the weak sample scores below 40, keyword stuffing scores below 40, and empty input is rejected. CI runs ruff and the tests on Python 3.11, 3.12 and 3.13.
 
 ## License
 
