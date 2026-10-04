@@ -4,7 +4,7 @@ from speakscore.text import Document, function_word_ratio, mattr, normalize
 
 
 def test_normalize_unwraps_lines_and_straightens_quotes():
-    raw = "Hello—everyone.\r\nI’m Asha,\nand I   sing.\n\n\n\nThanks."
+    raw = "Hello\u2014everyone.\r\nI\u2019m Asha,\nand I   sing.\n\n\n\nThanks."
     assert normalize(raw) == "Hello-everyone. I'm Asha, and I sing.\n\nThanks."
 
 

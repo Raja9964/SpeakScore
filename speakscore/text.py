@@ -5,7 +5,7 @@ from functools import cached_property
 _WORD_RE = re.compile(r"[A-Za-z0-9]+(?:'[A-Za-z]+)*")
 _SENTENCE_BREAK_RE = re.compile(r"(?<=[.!?])\s+|(?<=[.!?][\"')\]])\s+|\n{2,}")
 _TYPOGRAPHIC = str.maketrans(
-    {"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-"}
+    {"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"', "\u2013": "-", "\u2014": "-"}
 )
 
 FUNCTION_WORDS = frozenset(

@@ -36,3 +36,5 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+# Word lists read better as a split string than as long list literals.
+ignore = ["SIM905"]
