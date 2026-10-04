@@ -265,6 +265,6 @@
   "reliability": {
     "min_words": 50,
     "min_function_word_ratio": 0.3,
-    "min_lexical_diversity": 0.45
+    "min_lexical_diversity": 0.55
   }
 }
