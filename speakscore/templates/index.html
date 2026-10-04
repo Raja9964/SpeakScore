@@ -3,12 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SpeakScore</title>
+  <title>SpeakScore{% if demo %} &middot; Live demo{% endif %}</title>
   <meta name="description" content="Score a spoken self-introduction against a transparent rubric and get specific feedback on content, pace, grammar, clarity and engagement.">
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  {% if demo %}
+  <div class="demo-banner">
+    <strong>Live demo</strong> &middot; the Python engine runs in your browser (WebAssembly)
+    &middot; <a href="{{ demo.source_url }}">View source</a>
+  </div>
+  {% endif %}
+
   <header class="topbar">
     <div class="brand">
       <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
@@ -52,6 +59,12 @@
           {% endfor %}
         </div>
         {% endif %}
+        {% if demo %}
+        <p id="engine-status" class="engine-status" data-state="loading" role="status">
+          <span class="engine-dot" aria-hidden="true"></span>
+          <span id="engine-message">Loading the scoring engine&hellip; about 5&nbsp;MB, cached after the first visit</span>
+        </p>
+        {% endif %}
         <p id="error" class="error" role="alert" hidden></p>
       </form>
 
@@ -75,9 +88,20 @@
     </section>
   </main>
 
+  {% if demo %}
+  <footer class="footer muted">
+    SpeakScore v{{ version }} &middot; scored in your browser, nothing you type is uploaded
+    &middot; <a href="{{ demo.source_url }}">Source on GitHub</a>
+  </footer>
+  {% else %}
   <footer class="footer muted">SpeakScore v{{ version }} &middot; <a href="{{ url_for('api.health') }}">API health</a></footer>
+  {% endif %}
 
   <script id="samples-data" type="application/json">{{ samples|tojson }}</script>
+  {% if demo %}
+  <script id="engine-config" type="application/json">{{ demo.engine|tojson }}</script>
+  <script src="{{ url_for('static', filename='pyodide-scorer.js') }}"></script>
+  {% endif %}
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

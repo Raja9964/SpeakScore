@@ -42,6 +42,15 @@ body {
 .muted { color: var(--muted); }
 a { color: var(--accent); }
 
+.demo-banner {
+  padding: 9px 16px;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
+  text-align: center;
+}
+.demo-banner a { font-weight: 600; white-space: nowrap; }
+
 .topbar {
   max-width: 1240px;
   margin: 0 auto;
@@ -137,6 +146,13 @@ button { font: inherit; cursor: pointer; border-radius: 12px; }
 
 .error { color: var(--bad); margin: 14px 0 0; font-weight: 500; }
 
+.engine-status { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; font-size: 0.85rem; color: var(--muted); }
+.engine-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: pulse 1.2s ease-in-out infinite; }
+.engine-status[data-state="ready"] .engine-dot { background: var(--good); animation: none; }
+.engine-status[data-state="error"] { color: var(--bad); }
+.engine-status[data-state="error"] .engine-dot { background: var(--bad); animation: none; }
+@keyframes pulse { 50% { opacity: 0.25; } }
+
 .rubric { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 0.92rem; }
 .rubric summary { cursor: pointer; font-weight: 600; }
 .rubric ul { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
@@ -207,4 +223,8 @@ button { font: inherit; cursor: pointer; border-radius: 12px; }
   .card { padding: 18px; }
   textarea { min-height: 0; height: 200px; }
   .summary { gap: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engine-dot, .ring .value, .bar span { animation: none; transition: none; }
 }
